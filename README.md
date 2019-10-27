@@ -37,5 +37,5 @@ It must have been deployed now
 
 
 
-Code inspiration: https://github.com/jakerieger/FlaskIntroduction 
+Code inspiration: https://github.com/jakerieger/FlaskIntroduction <br/>
     youtube lecture video: https://www.youtube.com/watch?v=Z1RJmh_OqeA
