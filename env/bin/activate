@@ -46,7 +46,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/media/vineet/v/WORK/flaskvirtualenv/env"
+VIRTUAL_ENV="/media/vineet/v/WORK/finalapi/env"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

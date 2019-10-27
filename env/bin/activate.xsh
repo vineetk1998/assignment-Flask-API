@@ -28,7 +28,7 @@ def _deactivate(args):
 _deactivate(["nondestructive"])
 aliases["deactivate"] = _deactivate
 
-$VIRTUAL_ENV = r"/media/vineet/v/WORK/flaskvirtualenv/env"
+$VIRTUAL_ENV = r"/media/vineet/v/WORK/finalapi/env"
 
 $_OLD_VIRTUAL_PATH = $PATH
 $PATH = $PATH[:]

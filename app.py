@@ -1,67 +1,70 @@
-from flask import Flask, render_template, url_for, request, redirect, jsonify
+from flask import Flask, request, jsonify
+from flask_cors import CORS, cross_origin
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-import json
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+cors= CORS(app)
+app.config['CORS_HEADERS']= 'Content-Type'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'
 db = SQLAlchemy(app)
 
-class Todo(db.Model):
+class HGame(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	content = db.Column(db.String(200), nullable=False)
-	date_created = db.Column(db.DateTime, default= datetime.utcnow)
+	keyPress = db.Column(db.String(20), nullable=False)
+	started = db.Column(db.DateTime)
+	count = db.Column(db.Integer, default= 1)
+	player = db.Column(db.Boolean, nullable=False)
 
 	def __repr__(self):
 		return '<Task %r>' % self.id
 
 @app.route('/', methods=['POST', 'GET'])
+@cross_origin()
 def index():
 	if request.method == 'POST':
-		task_content = request.form['content']
-		new_task = Todo(content= task_content)
+		req_data = request.get_json()
+		now = datetime.strptime(req_data['started'], "%Y-%m-%dT%H:%M:%S.%fZ")
+		task_keyPress = req_data['keyPress']
+		task_started = req_data['started']
+		task_count = req_data['count']
+		task_player = req_data['player']
+
+		new_task = HGame(keyPress= task_keyPress, count= task_count, started=now, player= task_player)
 
 		try: 
 			db.session.add(new_task)
 			db.session.commit()
-			return redirect('/')
+			return "success"
 		except:
 			return 'There was an issue adding your task'
 
 	else:
-		tasks = Todo.query.order_by(Todo.date_created).all()
+		tasks = db.session.query(HGame).order_by(HGame.started).all()
 		result= []
 		for task in tasks:
-			result.append([task.content, (task.date_created)])
+			result.append([task.keyPress, task.started, task.count, task.player])
 		# print(json.dumps(tasks))
 		return jsonify(result)
 		# return render_template('index.html', tasks= tasks)
 
-@app.route('/delete/<int:id>')
-def delete(id):
-	task_to_delete = Todo.query.get_or_404(id)
-
+@app.route('/delete', methods=['GET'])
+def delete():
 	try: 
-		db.session.delete(task_to_delete)
+		db.session.query(HGame).delete()
 		db.session.commit()
-		return redirect('/')
+		return "success"
 	except:
 		return 'There was a problem deleting that task'
 
-@app.route('/update/<int:id>', methods=['GET', 'POST'])
-def update(id):
-	task = Todo.query.get_or_404(id)
+@app.route('/select/<int:id>', methods=['GET'])
+def select(id):
+		tasks = db.session.query(HGame).filter(HGame.id> id).order_by(HGame.started).all()
+		result= []
+		for task in tasks:
+			result.append([task.keyPress, task.started, task.count, task.player])
+		return jsonify(result)
 
-	if request.method == "POST":
-		task.content = request.form['content']
-		try: 
-			db.session.commit()
-			return redirect('/')
-		except:
-			return 'There was a problem in updating task.'
-
-	else: 
-		return render_template('update.html', task=task)
 
 if __name__ == "__main__":
 	app.run(debug=True)
