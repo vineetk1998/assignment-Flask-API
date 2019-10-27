@@ -1,6 +1,7 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import json
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
@@ -29,7 +30,12 @@ def index():
 
 	else:
 		tasks = Todo.query.order_by(Todo.date_created).all()
-		return render_template('index.html', tasks= tasks)
+		result= []
+		for task in tasks:
+			result.append([task.content, (task.date_created)])
+		# print(json.dumps(tasks))
+		return jsonify(result)
+		# return render_template('index.html', tasks= tasks)
 
 @app.route('/delete/<int:id>')
 def delete(id):
